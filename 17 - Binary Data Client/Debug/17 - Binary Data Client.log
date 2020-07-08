@@ -1,0 +1,8 @@
+﻿  17 - Binary Data Client.cpp
+C:\Include\ObjectBinaryDataCommunicator.h(120,27): warning C4101: 'comodin2': variable local sin referencia
+C:\Include\ObjectBinaryDataCommunicator.h(120,13): warning C4101: 'comodin': variable local sin referencia
+C:\Include\ObjectBinaryDataCommunicator.h(971,27): warning C4101: 'comodin2': variable local sin referencia
+C:\Include\ObjectBinaryDataCommunicator.h(971,13): warning C4101: 'comodin': variable local sin referencia
+E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\17 - Binary Data Client.cpp(303,12): warning C4101: 'ListItem': variable local sin referencia
+C:\Include\ObjectBinaryDataCommunicator.h(1052): warning C4715: 'OBDC_Client::GetIPList': no todas las rutas de acceso de control devuelven un valor
+  17 - Binary Data Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\Debug\17 - Binary Data Client.exe

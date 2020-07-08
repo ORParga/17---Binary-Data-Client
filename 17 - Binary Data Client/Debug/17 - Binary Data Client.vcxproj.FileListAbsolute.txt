@@ -1,0 +1,2 @@
+E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\Debug\17 - Binary Data Client.exe
+E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\Debug\17 - Binary Data Client.pdb
