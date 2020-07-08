@@ -13,9 +13,9 @@
 #endif
 #include "windowsx.h"
 #include "17 - Binary Data Client.h"
-#include "C:\Include\ClientControl.h"
-#include "C:\Include\ObjectBinaryDataCommunicator.h"
-#include "C:\Include\My_XTrace.h"
+#include "C:\Include\Include\ClientControl.h"
+#include "C:\Include\Include\ObjectBinaryDataCommunicator.h"
+#include "C:\Include\Include\My_XTrace.h"
 
 #define MAX_LOADSTRING 100
 #define IDC_MAINFRM_BTN_1               40501   //SEND button ID
