@@ -141,7 +141,9 @@
   <ItemGroup>
     <ClInclude Include="17 - Binary Data Client.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="OBDC_Client.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SharedClass_Client.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>

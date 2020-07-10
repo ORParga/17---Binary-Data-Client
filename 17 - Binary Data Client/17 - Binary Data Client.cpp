@@ -14,7 +14,8 @@
 #include "windowsx.h"
 #include "17 - Binary Data Client.h"
 #include "C:\Include\Include\ClientControl.h"
-#include "C:\Include\Include\ObjectBinaryDataCommunicator.h"
+#include "OBDC_Client.h"
+//#include "ObjectBinaryDataCommunicator.h"
 #include "C:\Include\Include\My_XTrace.h"
 
 #define MAX_LOADSTRING 100
@@ -219,7 +220,7 @@ void Ini_UI(HWND hwnd) {
 
     hwndButton = CreateWindow(
         L"BUTTON",              // Predefined class; Unicode assumed 
-        L"SEND",                // Button text 
+        L"DATA",                // Button text 
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
         ButtonRect.left,        // x position 
         ButtonRect.top,         // y position 
@@ -382,7 +383,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             const int textSize = 1000;
             char text[textSize];
             if (GetWindowTextA(hwndEdit, text, textSize) != 0)
-                WSAnb_Client.SendText(text, strlen(text));
+                WSAnb_Client.SendData();
+                //WSAnb_Client.SendText(text, strlen(text));
             return 0;
         }
         if (lParam == (LPARAM)hwndButtonReconnect)
