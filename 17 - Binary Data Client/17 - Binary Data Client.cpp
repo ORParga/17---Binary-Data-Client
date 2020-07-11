@@ -26,17 +26,31 @@ WCHAR szTitle[MAX_LOADSTRING];                  // App Tittle
 WCHAR szWindowClass[MAX_LOADSTRING];            // Window name
 
 //*********************COMMON CONTROLS ***************************************************
-HWND hwndButton, hwndEdit, hwndStatic, hwndStatic2, hwndMesageRec;
+HWND hwndButton, hwndStatic, hwndStatic2;// hwndMesageRec;
 HWND hwndIP, hwndPort, hwndButtonReconnect;
+HWND  hwndEditData1, hwndEditData2, hwndEditData3, hwndEditData4;
+HWND  hwndRecvData1, hwndRecvData2, hwndRecvData3, hwndRecvData4;
 RECT ComboIPRect1 = { 10,70,150,200 };
 RECT EditPortRect1 = { ComboIPRect1.left + ComboIPRect1.right + 10,70,100,20 };
 RECT ButtonReconect = { EditPortRect1.left ,30,80,30 };
 int topCoordMessages = 100;
-RECT StaticRect1 = { 10,topCoordMessages,80,20 };
-RECT StaticRect2 = { 100,topCoordMessages,100,20 };
-RECT StaticRect3 = { 10,topCoordMessages + 30,80,20 };
-RECT EditRect = { 100,topCoordMessages + 30,0,0 };
-RECT ButtonRect = { 100,topCoordMessages + 60,100,20 };
+RECT StaticRect1 = { 10,topCoordMessages,40,20 };
+RECT StaticRect2 = { 80,topCoordMessages,100,20 };
+RECT StaticRect3 = { 10,topCoordMessages + 30,40,20 };
+RECT EditRect = { 80,topCoordMessages + 30,0,0 };
+RECT ButtonRect = { 80,topCoordMessages + 60,100,20 };
+
+
+RECT RecvRect1 = { 60,topCoordMessages,40,20 };
+RECT RecvRect2 = { RecvRect1.left + RecvRect1.right + 5,topCoordMessages,40,20 };
+RECT RecvRect3 = { RecvRect2.left + RecvRect2.right + 5,topCoordMessages,60,20 };
+RECT RecvRect4 = { RecvRect3.left + RecvRect3.right + 5,topCoordMessages,60,20 };
+
+RECT EditData1nRect = { 60,topCoordMessages + 30,40,20 };
+RECT EditData2nRect = { EditData1nRect.left+ EditData1nRect.right+5,topCoordMessages + 30,40,20 };
+RECT EditData3nRect = { EditData2nRect.left + EditData2nRect.right + 5,topCoordMessages + 30,60,20 };
+RECT EditData4nRect = { EditData3nRect.left + EditData3nRect.right + 5,topCoordMessages + 30,60,20 };
+
 int ID_SendButton = IDC_MAINFRM_BTN_1;
 //********************WSA_NON_BLOKING initialization **************************************
 OBDC_Client WSAnb_Client;
@@ -50,7 +64,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int Ini_WSA_non_blocking_client(HWND);
-void UpdateUI(HDC, RECT*);
+void UpdateUI_IP_Port(HDC, RECT*);
 void Ini_UI(HWND);
 void ShowMessageControls(BOOL);
 
@@ -181,7 +195,7 @@ void Ini_UI(HWND hwnd) {
 
     hwndStatic = CreateWindowEx(
         0, L"STATIC",           // predefined class 
-        L"Recieve:",            // no window title 
+        L"Recv:",            // no window title 
         WS_CHILD | WS_VISIBLE | ES_LEFT,
         StaticRect1.left,       // x position 
         StaticRect1.top,        // y position 
@@ -192,18 +206,6 @@ void Ini_UI(HWND hwnd) {
         hInst,
         NULL);                  // pointer not needed 
 
-    hwndMesageRec = CreateWindowEx(
-        0, L"STATIC",           // predefined class 
-        L"No Message",          // no window title 
-        WS_CHILD | WS_BORDER | ES_LEFT,
-        StaticRect2.left,       // x position 
-        StaticRect2.top,        // y position 
-        StaticRect2.right,      // Button width
-        StaticRect2.bottom,     // Button height
-        hwnd,                   // parent window 
-        NULL,                   // No menu. 
-        hInst,
-        NULL);                  // pointer not needed 
 
     hwndStatic2 = CreateWindowEx(
         0, L"STATIC",           // predefined class 
@@ -220,7 +222,7 @@ void Ini_UI(HWND hwnd) {
 
     hwndButton = CreateWindow(
         L"BUTTON",              // Predefined class; Unicode assumed 
-        L"DATA",                // Button text 
+        L"Send data.",                // Button text 
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
         ButtonRect.left,        // x position 
         ButtonRect.top,         // y position 
@@ -231,11 +233,102 @@ void Ini_UI(HWND hwnd) {
         hInst,
         NULL);                  // Pointer to identify the button in WndProc()
 
-    hwndEdit = CreateWindowEx(
+    hwndRecvData1 = CreateWindowEx(
+        0, L"STATIC",           // predefined class 
+        L"",          // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        RecvRect1.left,       // x position 
+        RecvRect1.top,        // y position 
+        RecvRect1.right,      // Button width
+        RecvRect1.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+
+    hwndRecvData2 = CreateWindowEx(
+        0, L"STATIC",           // predefined class 
+        L"",          // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        RecvRect2.left,       // x position 
+        RecvRect2.top,        // y position 
+        RecvRect2.right,      // Button width
+        RecvRect2.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+
+    hwndRecvData3 = CreateWindowEx(
+        0, L"STATIC",           // predefined class 
+        L"",          // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        RecvRect3.left,       // x position 
+        RecvRect3.top,        // y position 
+        RecvRect3.right,      // Button width
+        RecvRect3.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+
+    hwndRecvData4 = CreateWindowEx(
+        0, L"STATIC",           // predefined class 
+        L"",          // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        RecvRect4.left,       // x position 
+        RecvRect4.top,        // y position 
+        RecvRect4.right,      // Button width
+        RecvRect4.bottom,     // Button height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+
+    hwndEditData1 = CreateWindowEx(
         0, L"EDIT",             // predefined class 
         NULL,                   // no window title 
         WS_CHILD | WS_BORDER | ES_LEFT,
-        0, 0, 0, 0,             // set size in WM_SIZE message 
+        EditData1nRect.left,
+        EditData1nRect.top,
+        EditData1nRect.right,
+        EditData1nRect.bottom,             // set size in WM_SIZE message 
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+    hwndEditData2 = CreateWindowEx(
+        0, L"EDIT",             // predefined class 
+        NULL,                   // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        EditData2nRect.left,
+        EditData2nRect.top,
+        EditData2nRect.right,
+        EditData2nRect.bottom,             // set size in WM_SIZE message 
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+    hwndEditData3 = CreateWindowEx(
+        0, L"EDIT",             // predefined class 
+        NULL,                   // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        EditData3nRect.left,
+        EditData3nRect.top,
+        EditData3nRect.right,
+        EditData3nRect.bottom,             // set size in WM_SIZE message 
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+    hwndEditData4 = CreateWindowEx(
+        0, L"EDIT",             // predefined class 
+        NULL,                   // no window title 
+        WS_CHILD | WS_BORDER | ES_LEFT,
+        EditData4nRect.left,
+        EditData4nRect.top,
+        EditData4nRect.right,
+        EditData4nRect.bottom,             // set size in WM_SIZE message 
         hwnd,                   // parent window 
         NULL,                   // No menu. 
         hInst,
@@ -300,6 +393,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     ADDRINFOW* ptr = NULL;
     INT iRetval;
     wchar_t ipstringbuffer[46];
+    wchar_t itoa_buffer[46];
     DWORD ipbufferlength = 46;
     TCHAR  ListItem[256];
 
@@ -317,7 +411,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 WSAnb_Client.Attemp_connect(IPString, portNumber);
                 break;
             case OBDC_Client::STATE::CONNECTED:
-                SetWindowTextA(hwndMesageRec, (LPCSTR)WSAnb_Client.BufferRecieved);
+                _itow_s(WSAnb_Client.sharedData.data1, itoa_buffer, 10);
+                SetWindowTextW(hwndRecvData1, (LPWSTR)itoa_buffer);
+                _itow_s(WSAnb_Client.sharedData.data2, itoa_buffer, 10);
+                SetWindowTextW(hwndRecvData2, (LPWSTR)itoa_buffer);
+                _itow_s(WSAnb_Client.sharedData.data3, itoa_buffer, 10);
+                SetWindowTextW(hwndRecvData3, (LPWSTR)itoa_buffer);
+                _itow_s(WSAnb_Client.sharedData.data4, itoa_buffer, 10);
+                SetWindowTextW(hwndRecvData4, (LPWSTR)itoa_buffer);
                 break;
             default:
                 break;
@@ -334,8 +435,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         Ini_UI(hWnd);
         // Add text to the Message editBox
-        wchar_t text[] = L"Message to send it to the server.";
-        SendMessage(hwndEdit, WM_SETTEXT, 0, (LPARAM)text);
+        wchar_t text[] = L"255";
+        SendMessage(hwndEditData1, WM_SETTEXT, 0, (LPARAM)text);
+        SendMessage(hwndEditData2, WM_SETTEXT, 0, (LPARAM)L"127");
+        //text[] = L"65536";
+        SendMessage(hwndEditData3, WM_SETTEXT, 0, (LPARAM)L"65535");
+        //text[] = L"65535";
+        SendMessage(hwndEditData4, WM_SETTEXT, 0, (LPARAM)L"65536");
         // Add the Port Number to editBox
         wchar_t text2[10];
         _itow_s(portNumber, text2, 10);
@@ -382,9 +488,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             const int textSize = 1000;
             char text[textSize];
-            if (GetWindowTextA(hwndEdit, text, textSize) != 0)
-                WSAnb_Client.SendData();
-                //WSAnb_Client.SendText(text, strlen(text));
+            unsigned long numberConverted_dword = 0;
+            unsigned char numberConverted_byte = 0;
+            SharedClass local_sharedData;
+            local_sharedData.SetDataFromWindow(hwndEditData1, &local_sharedData.data1);
+            local_sharedData.SetDataFromWindow(hwndEditData2, &local_sharedData.data2);
+            local_sharedData.SetDataFromWindow(hwndEditData3, &local_sharedData.data3);
+            local_sharedData.SetDataFromWindow(hwndEditData4, &local_sharedData.data4);
+            WSAnb_Client.SendData( local_sharedData);
             return 0;
         }
         if (lParam == (LPARAM)hwndButtonReconnect)
@@ -443,7 +554,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     break;
     case WM_SETFOCUS:
-        SetFocus(hwndEdit);
+        SetFocus(hwndEditData1);
         return 0;
     case WM_PAINT:
     {
@@ -459,12 +570,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case OBDC_Client::STATE::CONNECTED:
             DrawText(hdc, L"Estado:Conectado", -1, &TextRect, DT_VCENTER | DT_LEFT);
-            UpdateUI(hdc, &TextRect);
+            UpdateUI_IP_Port(hdc, &TextRect);
             ShowMessageControls(TRUE);
             break;
         case OBDC_Client::STATE::REQUESTING:
             DrawText(hdc, L"Estado:Solicitando conexion", -1, &TextRect, DT_VCENTER | DT_LEFT);
-            UpdateUI(hdc, &TextRect);
+            UpdateUI_IP_Port(hdc, &TextRect);
             ShowMessageControls(FALSE);
             break;
         default:
@@ -478,17 +589,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
     {
         // Make the edit control the size of the window's client area. 
-        MoveWindow(hwndMesageRec,
-            StaticRect2.left, StaticRect2.top,                    // starting x- and y-coordinates 
-            LOWORD(lParam) - StaticRect2.left - 20,                // width of client area 
-            20,                // height of client area 
-            TRUE);                 // repaint window 
+        //MoveWindow(hwndMesageRec,
+        //    StaticRect2.left, StaticRect2.top,                    // starting x- and y-coordinates 
+        //    LOWORD(lParam) - StaticRect2.left - 20,                // width of client area 
+        //    20,                // height of client area 
+        //    TRUE);                 // repaint window 
 
-        MoveWindow(hwndEdit,
-            EditRect.left, EditRect.top,                    // starting x- and y-coordinates 
-            LOWORD(lParam) - EditRect.left - 20,                // width of client area 
-            20,                // height of client area 
-            TRUE);                 // repaint window 
+        //MoveWindow(hwndEdit,
+        //    EditRect.left, EditRect.top,                    // starting x- and y-coordinates 
+        //    LOWORD(lParam) - EditRect.left - 20,                // width of client area 
+        //    20,                // height of client area 
+        //    TRUE);                 // repaint window 
         return 0;
     }
     case WM_DESTROY:
@@ -505,7 +616,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 /// </summary>
 /// <param name="hdc">Device context handler received by BeginPaint () on WM_PAINT</param>
 /// <param name="message">Texto para ser mostrado en primer lugar</param>
-void UpdateUI(HDC hdc, RECT* TextRect) {
+void UpdateUI_IP_Port(HDC hdc, RECT* TextRect) {
     TextRect->top += 20;
     TextRect->bottom += 20;
     DrawText(hdc, WSAnb_Client.IPString, -1, TextRect, DT_VCENTER | DT_LEFT);
@@ -522,8 +633,14 @@ void UpdateUI(HDC hdc, RECT* TextRect) {
 void ShowMessageControls(BOOL show) {
     ShowWindow(hwndStatic, show ? SW_SHOW : SW_HIDE);
     ShowWindow(hwndStatic2, show ? SW_SHOW : SW_HIDE);
-    ShowWindow(hwndMesageRec, show ? SW_SHOW : SW_HIDE);
-    ShowWindow(hwndEdit, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndRecvData1, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndRecvData2, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndRecvData3, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndRecvData4, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndEditData1, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndEditData2, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndEditData3, show ? SW_SHOW : SW_HIDE);
+    ShowWindow(hwndEditData4, show ? SW_SHOW : SW_HIDE);
     ShowWindow(hwndButton, show ? SW_SHOW : SW_HIDE);
 }
 // Controlador de mensajes del cuadro Acerca de.

@@ -8,4 +8,37 @@ public:
 	unsigned char data2 = 0;
 	unsigned long data3 = 0;
 	unsigned long data4 = 0;
+public: static void SetDataFromWindow(HWND hwnd, unsigned long* Data) {
+
+    const int textSize = 50;
+    char text[textSize];
+    unsigned long numberConverted_dword;
+    if (GetWindowTextA(hwnd, text, textSize) != 0)
+    {
+        numberConverted_dword = _atol_l(text, 0);
+
+        _ltoa_s(numberConverted_dword, text, 10);
+        SetWindowTextA(hwnd, text);
+
+        *Data = numberConverted_dword;
+    }
+}
+public: static void SetDataFromWindow(HWND hwnd, unsigned char* Data) {
+
+    const int textSize = 50;
+    char text[textSize];
+    unsigned long numberConverted_dword;
+    unsigned char numberConverted_byte;
+    if (GetWindowTextA(hwnd, text, textSize) != 0)
+    {
+        numberConverted_dword = _atoi_l(text, 0);
+        if (numberConverted_dword > 255)numberConverted_dword = 255;
+
+        _itoa_s(numberConverted_dword, text, 10);
+        SetWindowTextA(hwnd, text);
+
+        numberConverted_byte = (char)numberConverted_dword;
+        *Data = numberConverted_byte;
+    }
+}
 };

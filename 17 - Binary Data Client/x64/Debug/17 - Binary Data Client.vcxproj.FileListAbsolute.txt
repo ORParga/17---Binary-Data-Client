@@ -2,3 +2,5 @@ C:\Programacion\C++\Comunications\17---Binary-Data-Client\17 - Binary Data Clien
 C:\Programacion\C++\Comunications\17---Binary-Data-Client\17 - Binary Data Client\x64\Debug\17 - Binary Data Client.pdb
 E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17---Binary-Data-Client\17 - Binary Data Client\x64\Debug\17 - Binary Data Client.exe
 E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17---Binary-Data-Client\17 - Binary Data Client\x64\Debug\17 - Binary Data Client.pdb
+E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\x64\Debug\17 - Binary Data Client.exe
+E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\x64\Debug\17 - Binary Data Client.pdb

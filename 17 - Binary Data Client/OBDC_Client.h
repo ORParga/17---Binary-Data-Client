@@ -41,9 +41,9 @@ protected: DWORD        EventTotal = 1;
 protected: WSAEVENT     EventArray[WSA_MAXIMUM_WAIT_EVENTS];
          //************************** SEND RECIEVE ********************************************
 
-public:  static int const  DATA_BUFSIZE = 10;
-public: CHAR            BufferRecieved[DATA_BUFSIZE + 1] = { 0 };
-public:int              ReceivedBytes = { 0 };
+public:  static int const  DATA_BUFSIZE = 512;
+public: unsigned char            BufferReceived[DATA_BUFSIZE + 1] = { 0 };
+public:unsigned short              ReceivedBytes = { 0 };
 public: BOOL            OverflowAlert = { FALSE };
 public:SharedClass      sharedData;
 public:unsigned char sharedDataBuffer[sizeof(SharedClass)];
@@ -316,7 +316,7 @@ public:int testForEvents() {
       /// activates or deactivates the OverflowAlert if the incoming data is bigger or smaller than buffer
       /// </summary>
 protected:int FD_READ_response() {
-    ReceivedBytes = recv(ClientSocket, BufferRecieved, DATA_BUFSIZE, 0);
+    ReceivedBytes = recv(ClientSocket,(char*) BufferReceived, DATA_BUFSIZE, 0);
     if (ReceivedBytes == SOCKET_ERROR) {
 
         lastWSAError = WSAGetLastError();
@@ -332,10 +332,105 @@ protected:int FD_READ_response() {
         OverflowAlert = FALSE;
     }
     //El tamaño del buffer es DATA_BUFSIZE+1 para poder colocar un cero al final
-    BufferRecieved[ReceivedBytes] = 0;
+    BufferReceived[ReceivedBytes] = 0;
+    GetBinaryDataFromSocketBuffer(&sharedData);
     return 0;
 }
 
+         /// <summary>
+         /// Extrae los datos recibidos de una transmision TCP, elimina la "basura" al principio 
+         /// y al final de la transmision
+         ///, verifica su fiabilidad y los clasifica en la clase SharedClass
+         /// el tamaño máximo para el buffer sería de 65535, puesto que usamos un "unsigned short" como indice
+         /// </summary>
+         /// <param name="BufferArrayIndex">Indice del Socket usado</param>
+         /// <returns>TRUE if succeed.There is new data avaliable in member variable "sharedData"
+         ///</returns>
+protected:bool GetBinaryDataFromSocketBuffer(SharedClass* receivedSharedObject)
+{
+    bool returnValue = false;
+    unsigned short mark_index = 0, buffer_index = 0, sharedDataStart = 0;
+    unsigned short i,endLoop;
+    unsigned long checksum = 0;
+    SharedClass sharedData;
+
+    if (ReceivedBytes < sizeof(SharedClass))
+        return false;
+    while (buffer_index < ReceivedBytes)
+    {
+        while (BufferReceived[buffer_index] == sharedData.Mark[mark_index])
+        {
+            mark_index++;
+            buffer_index++;
+            if (mark_index == (sizeof(sharedData.Mark)))
+            {
+                //Marca encontrada
+                if ((ReceivedBytes - buffer_index) <= (sizeof(SharedClass) - sizeof(sharedData.Mark)))
+                {
+                    //Hay datos suficientes en el buffer para albergar un objeto SharedData
+                    i = buffer_index;
+                    sharedData.checksum = BufferReceived[i++];
+                    sharedData.checksum += BufferReceived[i++] << 8;
+                    sharedData.checksum += BufferReceived[i++] << 16;
+                    sharedData.checksum += BufferReceived[i++] << 24;
+
+                    sharedData.data1 = BufferReceived[i++];
+                    sharedData.data2 = BufferReceived[i++];
+
+                    sharedData.data3 = BufferReceived[i++];
+                    sharedData.data3 += BufferReceived[i++] << 8;
+                    sharedData.data3 += BufferReceived[i++] << 16;
+                    sharedData.data3 += BufferReceived[i++] << 24;
+
+                    sharedData.data4 = BufferReceived[i++];
+                    sharedData.data4 += BufferReceived[i++] << 8;
+                    sharedData.data4 += BufferReceived[i++] << 16;
+                    sharedData.data4 += BufferReceived[i++] << 24;
+                }
+                //Verificar checksum
+                endLoop = i;
+                for (i = buffer_index + sizeof(sharedData.checksum), checksum = 0; i < endLoop; i++)
+                {
+                    checksum += BufferReceived[i];
+                }
+                if (checksum == sharedData.checksum)
+                {
+                    //los datos son válidos
+                    receivedSharedObject->checksum = sharedData.checksum;
+                    receivedSharedObject->data1 = sharedData.data1;
+                    receivedSharedObject->data2 = sharedData.data2;
+                    receivedSharedObject->data3 = sharedData.data3;
+                    receivedSharedObject->data4 = sharedData.data4;
+                    returnValue = true;
+                    //En este punto devería comprobar si hay espacio en la clase para alvergar otro paquete entrante
+                    //que pueda estar en la cola del buffer
+                    //if(hay espacio en la clase OBDC_Server para más datos entrantes)
+                    //buffer_index = i;
+                    //else
+                    return true;
+                }
+                else
+                {
+                    //Si no se supera el checksum, existe la posibilidad de que quede un paquete integro 
+                    // en la cola del buffer y que éste empiece justo donde acaba el sharedData.Mark anterior
+                    //así que no es necesario actualizar buffer_index (ya está apuntando al final de dicho sharedData.Mark)
+                    //, solo restarle 1 para poder continuar con el bucle
+                    buffer_index--;
+                    break;
+                }
+            }
+            else if (buffer_index >= ReceivedBytes)
+            {
+                return returnValue;
+            }
+        }
+        mark_index = 0;
+        buffer_index++;
+
+    }
+    // buffer ends
+    return returnValue;
+}
          /// <summary>
          /// Empieza haciendo una llamada a WSAStartup() lo que inicializa el sistema WinsockDLL de windows.
          /// Inmediatamente llama a GetAddrInfoW() para hacer recibir un listado de las IP disponibles
@@ -495,19 +590,19 @@ public: BOOL SendText(char* text, size_t len) {
     return FALSE;
 }
 
-public:BOOL SendData() {
+public:BOOL SendData(SharedClass local_sharedData) {
     //Prepare checksum**********************************
     unsigned long bufferSize = sizeof(SharedClass);
 
-    sharedData.data1 = 1;
-    sharedData.data2 = 2;
-    sharedData.data3 = 0x20100804;
-    sharedData.data4 = 0x00008040;
+    //local_sharedData.data1 = 1;
+    //local_sharedData.data2 = 2;
+    //local_sharedData.data3 = 0x20100804;
+    //local_sharedData.data4 = 0x00008040;
 
 
-    unsigned long checksum = sharedData.data1+ sharedData.data2;
+    unsigned long checksum = local_sharedData.data1+ local_sharedData.data2;
 
-    unsigned long* pointer = &sharedData.data3;
+    unsigned long* pointer = &local_sharedData.data3;
     unsigned char* myByte = (unsigned char*)pointer;
 
     checksum += (myByte[0]);
@@ -515,7 +610,7 @@ public:BOOL SendData() {
     checksum += (myByte[2]);
     checksum += (myByte[3]);
 
-    pointer = &sharedData.data4;
+    pointer = &local_sharedData.data4;
     myByte = (unsigned char*)pointer;
 
     checksum += (myByte[0]);
@@ -523,36 +618,36 @@ public:BOOL SendData() {
     checksum += (myByte[2]);
     checksum += (myByte[3]);
 
-    sharedData.checksum = checksum;
+    local_sharedData.checksum = checksum;
     int i = 0;
     //Prepare buffer**********************************
-    sharedDataBuffer[i] = sharedData.Mark[0];
-    sharedDataBuffer[++i] = sharedData.Mark[1];
-    sharedDataBuffer[++i] = sharedData.Mark[2];
-    sharedDataBuffer[++i] = sharedData.Mark[3];
-    sharedDataBuffer[++i] = sharedData.Mark[4];
-    sharedDataBuffer[++i] = sharedData.Mark[5];
-    sharedDataBuffer[++i] = sharedData.Mark[6];
-    sharedDataBuffer[++i] = sharedData.Mark[7];
+    sharedDataBuffer[i] = local_sharedData.Mark[0];
+    sharedDataBuffer[++i] = local_sharedData.Mark[1];
+    sharedDataBuffer[++i] = local_sharedData.Mark[2];
+    sharedDataBuffer[++i] = local_sharedData.Mark[3];
+    sharedDataBuffer[++i] = local_sharedData.Mark[4];
+    sharedDataBuffer[++i] = local_sharedData.Mark[5];
+    sharedDataBuffer[++i] = local_sharedData.Mark[6];
+    sharedDataBuffer[++i] = local_sharedData.Mark[7];
 
 
     sharedDataBuffer[++i] = checksum & 0xFF;
-    sharedDataBuffer[i++] = (checksum >> 8) & 0xFF;
+    sharedDataBuffer[++i] = (checksum >> 8) & 0xFF;
     sharedDataBuffer[++i] = (checksum >> 16) & 0xFF;
     sharedDataBuffer[++i] = (checksum >> 24) & 0xFF;
 
-    sharedDataBuffer[++i] = sharedData.data1 ;
-    sharedDataBuffer[++i] = sharedData.data2 ;
+    sharedDataBuffer[++i] = local_sharedData.data1 ;
+    sharedDataBuffer[++i] = local_sharedData.data2 ;
 
-    sharedDataBuffer[++i] = sharedData.data3 & 0xFF;
-    sharedDataBuffer[++i] = (sharedData.data3 >> 8) & 0xFF;
-    sharedDataBuffer[++i] = (sharedData.data3 >> 16) & 0xFF;
-    sharedDataBuffer[++i] = (sharedData.data3 >> 24) & 0xFF;
+    sharedDataBuffer[++i] = local_sharedData.data3 & 0xFF;
+    sharedDataBuffer[++i] = (local_sharedData.data3 >> 8) & 0xFF;
+    sharedDataBuffer[++i] = (local_sharedData.data3 >> 16) & 0xFF;
+    sharedDataBuffer[++i] = (local_sharedData.data3 >> 24) & 0xFF;
 
-    sharedDataBuffer[++i] = sharedData.data4 & 0xFF;
-    sharedDataBuffer[++i] = (sharedData.data4 >> 8) & 0xFF;
-    sharedDataBuffer[++i] = (sharedData.data4 >> 16) & 0xFF;
-    sharedDataBuffer[++i] = (sharedData.data4 >> 24) & 0xFF;
+    sharedDataBuffer[++i] = local_sharedData.data4 & 0xFF;
+    sharedDataBuffer[++i] = (local_sharedData.data4 >> 8) & 0xFF;
+    sharedDataBuffer[++i] = (local_sharedData.data4 >> 16) & 0xFF;
+    sharedDataBuffer[++i] = (local_sharedData.data4 >> 24) & 0xFF;
 
     //Send buffer**********************************
     lastWSAError = 0;
