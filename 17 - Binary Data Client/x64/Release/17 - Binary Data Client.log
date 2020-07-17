@@ -5,8 +5,8 @@ E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Clien
 E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\17 - Binary Data Client.cpp(398,12): warning C4101: 'ListItem': variable local sin referencia
 E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\17 - Binary Data Client.cpp(490,18): warning C4101: 'text': variable local sin referencia
   Generando código
-  Previous IPDB not found, fall back to full compilation.
-E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\OBDC_Client.h(530): warning C4715: 'OBDC_Client::GetIPList': no todas las rutas de acceso de control devuelven un valor
-  All 50 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  0 of 50 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
   17 - Binary Data Client.vcxproj -> E:\PROGRAMACION\C++\Comunications\17 - Binary Data Client\17 - Binary Data Client\x64\Release\17 - Binary Data Client.exe

@@ -80,7 +80,7 @@ protected: wchar_t      lpBufferWindowsError[lpBufferWindowsErrorLen];
          }
 
          /// <summary>
-         /// Inicializa la maquinaria WinSock2 de windows.
+         /// Inicializa WinSock2 de windows.
          /// Inicializa el socket cliente.
          /// Inicializa el evento FD_CONNECT|FD_CLOSE|FD_READ|FD_WRITE.
          /// No altera el STATUS del objeto WSA_non_blocking_Client
