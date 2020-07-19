@@ -11,6 +11,9 @@
 #ifndef IDT_TIMER1_MILIS
 #define IDT_TIMER1_MILIS 500
 #endif
+#define IDC_GRPBUTTONS 1001
+#define IDC_CHK1 1002
+#define IDC_CHK2 1003
 #include "windowsx.h"
 #include "17 - Binary Data Client.h"
 #include "ClientControl_Client.h"
@@ -27,13 +30,19 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // Window name
 
 //*********************COMMON CONTROLS ***************************************************
 HWND hwndButton, hwndStatic, hwndStatic2;// hwndMesageRec;
-HWND hwndIP, hwndPort, hwndButtonReconnect;
+HWND hGrpButtons, hGrpRad1, hGrpRad2;
+HWND hwndIP, hwndEditIP, hwndPort, hwndButtonReconnect;
 HWND  hwndEditData1, hwndEditData2, hwndEditData3, hwndEditData4;
 HWND  hwndRecvData1, hwndRecvData2, hwndRecvData3, hwndRecvData4;
-RECT ComboIPRect1 = { 10,70,150,200 };
-RECT EditPortRect1 = { ComboIPRect1.left + ComboIPRect1.right + 10,70,100,20 };
+RECT RadGroupIPRect = { 5,60,25,60 };
+RECT RadIPRect1 = { 10,70,15,20 };
+RECT RadIPRect2 = { 10,100,15,20 };
+RECT ComboIPRect1 = { 30,70,150,200 };
+RECT EditIPRect = { 30,100,150,20 };
+RECT EditPortRect1 = { ComboIPRect1.left + ComboIPRect1.right + 10,70,80,20 };
 RECT ButtonReconect = { EditPortRect1.left ,30,80,30 };
-int topCoordMessages = 100;
+
+int topCoordMessages = 130;
 RECT StaticRect1 = { 10,topCoordMessages,40,20 };
 RECT StaticRect2 = { 80,topCoordMessages,100,20 };
 RECT StaticRect3 = { 10,topCoordMessages + 30,40,20 };
@@ -151,7 +160,41 @@ int Ini_WSA_non_blocking_client(HWND hwnd) {
 /// </summary>
 /// <param name="hwnd">main Window Handle</param>
 void Ini_UI(HWND hwnd) {
-    //*******************************IP COMBO BOX + PORT EDIT + REconnect Button***********
+    //***********************************************Group Radio Button ***********************************************
+    hGrpButtons = CreateWindowEx(WS_EX_WINDOWEDGE,
+        L"BUTTON",
+        L"",
+        WS_VISIBLE | WS_CHILD | BS_GROUPBOX,// <----BS_GROUPBOX does nothing on the grouping 
+        RadGroupIPRect.left,      // x position 
+        RadGroupIPRect.top,       // y position 
+        RadGroupIPRect.right,     // Combo width
+        RadGroupIPRect.bottom,    // Combo height
+        hwnd,
+        (HMENU)IDC_GRPBUTTONS,
+        hInst, NULL);
+    hGrpRad1=CreateWindowEx(WS_EX_WINDOWEDGE,
+        L"BUTTON",
+        L"",
+        WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP,  // <---- WS_GROUP group the following radio buttons 1st,2nd button 
+        RadIPRect1.left,      // x position 
+        RadIPRect1.top,       // y position 
+        RadIPRect1.right,     // Combo width
+        RadIPRect1.bottom,    // Combo height
+        hwnd, //<----- Use main window handle
+        (HMENU)IDC_CHK1,
+        hInst, NULL);
+    hGrpRad2=CreateWindowEx(WS_EX_WINDOWEDGE,
+        L"BUTTON",
+        L"",
+        WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Styles 
+        RadIPRect2.left,      // x position 
+        RadIPRect2.top,       // y position 
+        RadIPRect2.right,     // Combo width
+        RadIPRect2.bottom,    // Combo height
+        hwnd,
+        (HMENU)IDC_CHK2,
+        hInst, NULL);
+    //*******************************IP COMBO BOX + IP Manual EDIT + PORT EDIT + REconnect Button***********
     hwndIP = CreateWindowEx(
         0, L"COMBOBOX",         // predefined class 
         L"Recieve:",            // no window title 
@@ -160,6 +203,19 @@ void Ini_UI(HWND hwnd) {
         ComboIPRect1.top,       // y position 
         ComboIPRect1.right,     // Combo width
         ComboIPRect1.bottom,    // Combo height
+        hwnd,                   // parent window 
+        NULL,                   // No menu. 
+        hInst,
+        NULL);                  // pointer not needed 
+
+    hwndEditIP  = CreateWindowEx(
+        0, L"EDIT",             // predefined class 
+        NULL,                   // no window title 
+        WS_CHILD | WS_BORDER | WS_VISIBLE | ES_LEFT,
+        EditIPRect.left,
+        EditIPRect.top,
+        EditIPRect.right,
+        EditIPRect.bottom,   // set size in WM_SIZE message 
         hwnd,                   // parent window 
         NULL,                   // No menu. 
         hInst,
@@ -446,10 +502,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         wchar_t text2[10];
         _itow_s(portNumber, text2, 10);
         SendMessage(hwndPort, WM_SETTEXT, 0, (LPARAM)text2);
-
-        // Add string to combobox.
+        //Add string to the Manual IP Edit box selector
+        SendMessage(hwndEditIP, WM_SETTEXT, 0, (LPARAM)L"192.168.1.1");
+        // Add string to Auto IP combobox.
         //First add the default localhost IP
         SendMessage(hwndIP, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)IPString);
+        SendMessage(hGrpRad1, BM_SETCHECK, BST_CHECKED, 0);
         //Then. list the avaliable IP's on device
         ADDRINFOW* addrResult;
         WSAnb_Client.GetIPList(&addrResult);
@@ -501,10 +559,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (lParam == (LPARAM)hwndButtonReconnect)
         {
             //Get IP 
-            int ItemIndex = SendMessage(hwndIP, (UINT)CB_GETCURSEL,
-                (WPARAM)0, (LPARAM)0);
-            (TCHAR)SendMessage(hwndIP, (UINT)CB_GETLBTEXT,
-                (WPARAM)ItemIndex, (LPARAM)IPString);
+            if (SendMessage(hGrpRad1, BM_GETCHECK, 0, 0))
+            {
+                //IP Auto
+                int ItemIndex = SendMessage(hwndIP, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+                (TCHAR)SendMessage(hwndIP, (UINT)CB_GETLBTEXT, (WPARAM)ItemIndex, (LPARAM)IPString);
+            }
+        else
+        {
+            //IP Manual
+                GetWindowText(hwndEditIP,IPString,sizeof(IPString));
+        }
             //Get Port
             const int textSize = 1000;
             wchar_t text[textSize];
